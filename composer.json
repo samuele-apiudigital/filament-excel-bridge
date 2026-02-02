@@ -2,30 +2,39 @@
     "name": "apiu/filament-excel-bridge",
     "description": "Bridge package for Filament and Laravel Excel - provides standardized Excel export actions with async support, notifications, and signed download URLs.",
     "type": "library",
-    "require": {
-        "php": "^8.2",
-        "laravel/framework": "^11.31",
-        "filament/filament": "^4.5.3",
-        "maatwebsite/excel": "^3.1.67"
-    },
     "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Apiu\\FilamentExcelBridge\\": "src/"
-        }
-    },
     "authors": [
         {
             "name": "samuelecostantini",
             "email": "costantini@apiu.digital"
         }
     ],
-    "minimum-stability": "stable",
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^12.48",
+        "filament/filament": "^4.5.3",
+        "maatwebsite/excel": "^3.1.67"
+    },
+    "autoload": {
+        "psr-4": {
+            "Apiu\\FilamentExcelBridge\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Apiu\\FilamentExcelBridge\\Tests\\": "tests/"
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [
                 "Apiu\\FilamentExcelBridge\\ServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "FilamentExport": "Apiu\\FilamentExcelBridge\\Facades\\FilamentExport"
+            }
         }
-    }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }

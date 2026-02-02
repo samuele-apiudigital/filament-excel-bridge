@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Apiu\FilamentExcelBridge\Jobs;
 
-use Filament\Notifications\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Bus\Queueable;
@@ -24,6 +24,7 @@ final class NotifyUserForExport implements ShouldQueue
     public function __construct(
         public Authenticatable $user,
         public string $fileName,
+        public string $downloadMessage = 'Download is ready'
     ) {}
 
     public function handle(): void
@@ -35,13 +36,13 @@ final class NotifyUserForExport implements ShouldQueue
         );
 
         Notification::make()
-            ->title('Export completato')
-            ->body('Il tuo export è pronto per il download.')
+            ->title('Export ✅')
+            ->body($this->downloadMessage)
             ->icon('heroicon-o-document-arrow-down')
             ->success()
             ->actions([
                 Action::make('download')
-                    ->label('Scarica')
+                    ->label('Download export')
                     ->url($url)
                     ->openUrlInNewTab(),
             ])

@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Apiu\FilamentExcelBridge\Filament\Actions;
 
+use Apiu\FilamentExcelBridge\Jobs\NotifyUserForExport;
 use Closure;
 use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Facades\Excel;
@@ -15,9 +18,15 @@ final class ExcelExportAction extends Action
 {
     protected string|Closure|null $exportClass = null;
 
+    protected bool $shouldQueue = true;
+
     protected mixed $exportFilter = null;
 
-    protected string|Closure $fileName = 'export';
+    protected string|Closure $fileName = 'export.xls';
+
+    protected string|Closure $notificationMessage = 'Export in progress. You will receive a notification when it is ready.';
+
+    protected string|Closure $downloadMessage = 'Export is ready to download.';
 
     protected function setUp(): void
     {
@@ -27,16 +36,27 @@ final class ExcelExportAction extends Action
 
         $this->icon('heroicon-o-arrow-up-tray');
 
-        $this->action(function (): BinaryFileResponse {
+        $this->action(function (): ?BinaryFileResponse {
             $exportClass = $this->evaluate($this->exportClass);
-            $filter = $this->evaluate($this->exportFilter);
-
+            $shouldQueue = $this->evaluate($this->shouldQueue);
             $timestamp = Date::now()->format('d-m-Y-H-i-s');
+            $notificationMessage = $this->evaluate($this->notificationMessage);
             $fileName = $this->evaluate($this->fileName).'-'.$timestamp.'.xlsx';
+            $downloadMessage = $this->evaluate($this->downloadMessage);
 
-            $export = $filter !== null ? new $exportClass($filter) : new $exportClass();
+            if ($shouldQueue) {
+                Notification::make('Success')
+                    ->success()
+                    ->body($notificationMessage);
+                Excel::queue($exportClass, $fileName)
+                    ->chain([
+                        NotifyUserForExport::dispatch(Auth::user(), $fileName, $downloadMessage)
+                    ]);
+                return null;
+            } else {
+                return Excel::download($exportClass, $fileName);
+            }
 
-            return Excel::download($export, $fileName);
         });
     }
 
@@ -46,18 +66,33 @@ final class ExcelExportAction extends Action
     }
 
     /**
-     * @param  class-string<Exportable>|Closure  $exportClass
+     * @param string|Closure|null $exportClass
+     * @return ExcelExportAction
      */
-    public function export(string|Closure $exportClass): static
+    public function export(string|Closure|null $exportClass): static
     {
         $this->exportClass = $exportClass;
 
         return $this;
     }
 
-    public function filterBy(mixed $filter): static
+    public function shouldQueue(bool|Closure|null $flag = true): static
     {
-        $this->exportFilter = $filter;
+        $this->shouldQueue = $flag;
+
+        return $this;
+    }
+
+    public function notificationMessage(string|Closure $message): static
+    {
+        $this->notificationMessage = $message;
+
+        return $this;
+    }
+
+    public function downloadMessage(string|Closure $message): static
+    {
+        $this->downloadMessage = $message;
 
         return $this;
     }
