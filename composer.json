@@ -1,0 +1,29 @@
+{
+    "name": "apiu/laravel-textract-parser",
+    "description": "Seamlessly integrate AWS Textract into your Laravel application. This package handles the API interaction and optimizes the verbose JSON response, transforming OCR data into a developer-friendly format ready for use.",
+    "type": "library",
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^11.31"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Apiu\\FilamentExcelBridge\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "samuelecostantini",
+            "email": "costantini@apiu.digital"
+        }
+    ],
+    "minimum-stability": "stable",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Apiu\\FilamentExcelBridge\\ServiceProvider"
+            ]
+        }
+    }
+}
