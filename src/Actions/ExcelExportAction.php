@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Apiu\FilamentExcelBridge\Filament\Actions;
+namespace Apiu\FilamentExcelBridge\Actions;
 
 use Apiu\FilamentExcelBridge\Jobs\NotifyUserForExport;
 use Closure;
@@ -10,13 +10,12 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
-use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 final class ExcelExportAction extends Action
 {
-    protected string|Closure|null $exportClass = null;
+    protected mixed $exportClass = null;
 
     protected bool $shouldQueue = true;
 
@@ -47,11 +46,14 @@ final class ExcelExportAction extends Action
             if ($shouldQueue) {
                 Notification::make('Success')
                     ->success()
-                    ->body($notificationMessage);
+                    ->body($notificationMessage)
+                    ->send();
+
                 Excel::queue($exportClass, $fileName)
                     ->chain([
-                        NotifyUserForExport::dispatch(Auth::user(), $fileName, $downloadMessage)
+                        new NotifyUserForExport(Auth::user(), $fileName, $downloadMessage)
                     ]);
+
                 return null;
             } else {
                 return Excel::download($exportClass, $fileName);
@@ -69,7 +71,7 @@ final class ExcelExportAction extends Action
      * @param string|Closure|null $exportClass
      * @return ExcelExportAction
      */
-    public function export(string|Closure|null $exportClass): static
+    public function export(mixed $exportClass): static
     {
         $this->exportClass = $exportClass;
 
