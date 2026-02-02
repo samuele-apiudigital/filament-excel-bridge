@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
+namespace Apiu\FilamentExcelBridge\Jobs;
 
-use App\Models\User;
-use Filament\Actions\Action;
+use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -21,14 +22,14 @@ final class NotifyUserForExport implements ShouldQueue
     use SerializesModels;
 
     public function __construct(
-        public User $user,
+        public Authenticatable $user,
         public string $fileName,
     ) {}
 
     public function handle(): void
     {
         $url = URL::temporarySignedRoute(
-            'export.download',
+            'filament-excel-bridge.export.download',
             now()->addDays(7),
             ['file' => $this->fileName]
         );

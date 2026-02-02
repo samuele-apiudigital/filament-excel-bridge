@@ -2,47 +2,69 @@
 
 declare(strict_types=1);
 
+namespace Apiu\FilamentExcelBridge\Filament\Actions;
 
-use App\Exports\AssignedVouchersExport;
-use App\Models\Brand;
-use App\Models\Request;
 use Closure;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\Date;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 final class ExcelExportAction extends Action
 {
-    private Request|Brand|Closure|null $filter = null;
+    protected string|Closure|null $exportClass = null;
+
+    protected mixed $exportFilter = null;
+
+    protected string|Closure $fileName = 'export';
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->label('Esporta buoni assegnati');
+        $this->label('Export');
 
         $this->icon('heroicon-o-arrow-up-tray');
 
         $this->action(function (): BinaryFileResponse {
-            /** @var Brand|Request $filter */
-            $filter = $this->evaluate($this->filter);
+            $exportClass = $this->evaluate($this->exportClass);
+            $filter = $this->evaluate($this->exportFilter);
 
             $timestamp = Date::now()->format('d-m-Y-H-i-s');
-            $fileName = 'buoni-assegnati-'.$timestamp.'.xlsx';
+            $fileName = $this->evaluate($this->fileName).'-'.$timestamp.'.xlsx';
 
-            return Excel::download(new AssignedVouchersExport($filter), $fileName);
+            $export = $filter !== null ? new $exportClass($filter) : new $exportClass();
+
+            return Excel::download($export, $fileName);
         });
     }
 
     public static function getDefaultName(): string
     {
-        return 'exportAssignedVouchers';
+        return 'excelExport';
     }
 
-    public function filterBy(Request|Brand|Closure|null $filter): self
+    /**
+     * @param  class-string<Exportable>|Closure  $exportClass
+     */
+    public function export(string|Closure $exportClass): static
     {
-        $this->filter = $filter ?: Brand::query()->first();
+        $this->exportClass = $exportClass;
+
+        return $this;
+    }
+
+    public function filterBy(mixed $filter): static
+    {
+        $this->exportFilter = $filter;
+
+        return $this;
+    }
+
+    public function fileName(string|Closure $fileName): static
+    {
+        $this->fileName = $fileName;
 
         return $this;
     }

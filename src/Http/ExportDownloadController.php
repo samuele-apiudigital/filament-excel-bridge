@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Http;
+namespace Apiu\FilamentExcelBridge\Http;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;

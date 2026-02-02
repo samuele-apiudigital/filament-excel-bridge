@@ -1,6 +1,6 @@
 {
-    "name": "apiu/laravel-textract-parser",
-    "description": "Seamlessly integrate AWS Textract into your Laravel application. This package handles the API interaction and optimizes the verbose JSON response, transforming OCR data into a developer-friendly format ready for use.",
+    "name": "apiu/filament-excel-bridge",
+    "description": "Bridge package for Filament and Laravel Excel - provides standardized Excel export actions with async support, notifications, and signed download URLs.",
     "type": "library",
     "require": {
         "php": "^8.2",
