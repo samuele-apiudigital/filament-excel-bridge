@@ -18,9 +18,7 @@ final class ExcelExportAction extends Action
     protected mixed $exportClass = null;
 
     protected bool $shouldQueue = true;
-
-    protected mixed $exportFilter = null;
-
+    
     protected string|Closure $fileName = 'export.xls';
 
     protected string|Closure $notificationMessage = 'Export in progress. You will receive a notification when it is ready.';
